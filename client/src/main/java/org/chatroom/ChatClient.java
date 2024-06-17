@@ -15,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,19 @@ public class ChatClient extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static void alertError(String msg) {
+        VBox errorBox = new VBox(5);
+        errorBox.setPadding(new Insets(10));
+        Label label = new Label("An error occurred:\n" + msg);
+        label.setWrapText(true);
+        errorBox.getChildren().add(label);
+        Scene errorScene = new Scene(errorBox, 200, 100);
+        Stage errorStage = new Stage();
+        errorStage.setTitle("Error");
+        errorStage.setScene(errorScene);
+        errorStage.show();
     }
 
     @Override
@@ -174,19 +188,6 @@ public class ChatClient extends Application {
 
         // Display image in message area
         displayImage(username, date, image);
-    }
-
-    public static void alertError(String msg) {
-        VBox errorBox = new VBox(5);
-        errorBox.setPadding(new Insets(10));
-        Label label = new Label("An error occurred:\n" + msg);
-        label.setWrapText(true);
-        errorBox.getChildren().add(label);
-        Scene errorScene = new Scene(errorBox, 200, 100);
-        Stage errorStage = new Stage();
-        errorStage.setTitle("Error");
-        errorStage.setScene(errorScene);
-        errorStage.show();
     }
 
     public void displayMessage(Message message) {

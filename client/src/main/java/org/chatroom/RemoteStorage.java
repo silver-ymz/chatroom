@@ -5,7 +5,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.Socket;
 import java.util.Date;
 import java.util.List;
@@ -36,7 +35,7 @@ public class RemoteStorage {
 
     public void sendMessage(Message message) {
         try {
-            byte[] data = SerializationUtils.serialize((Serializable) message);
+            byte[] data = SerializationUtils.serialize(message);
             out.writeInt(data.length);
             out.write(data);
         } catch (IOException e) {
@@ -52,7 +51,7 @@ public class RemoteStorage {
             int length = in.readInt();
             byte[] data = new byte[length];
             in.readFully(data);
-            messages = (List<Message>) SerializationUtils.deserialize(data);
+            messages = SerializationUtils.deserialize(data);
         } catch (IOException e) {
             ChatClient.alertError("Failed to receive data: " + e.getMessage());
             throw new RuntimeException(e);
@@ -83,7 +82,7 @@ public class RemoteStorage {
                 int length = in.readInt();
                 byte[] data = new byte[length];
                 in.readFully(data);
-                Message message = (Message) SerializationUtils.deserialize(data);
+                Message message = SerializationUtils.deserialize(data);
                 msgHandler.accept(message);
             }
         } catch (IOException e) {

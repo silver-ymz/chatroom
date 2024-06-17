@@ -12,13 +12,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ChatServer {
+    private static final Map<String, DataOutputStream> clients = new HashMap<>();
     public static int PORT = Integer.parseInt(System.getenv("SERVER_PORT"));
     public static String DB_URL = System.getenv("DB_URL");
-
     private static Connection connection;
     private static DataInputStream messageIn;
     private static ExecutorService executor;
-    private static final Map<String, DataOutputStream> clients = new HashMap<>();
 
     public static void main(String[] args) {
         start();
@@ -67,7 +66,7 @@ public class ChatServer {
                         if (entry.getKey().equals(username)) {
                             continue;
                         }
-                        byte[] messageData = SerializationUtils.serialize((Serializable) message);
+                        byte[] messageData = SerializationUtils.serialize(message);
                         entry.getValue().writeInt(messageData.length);
                         entry.getValue().write(messageData);
                     }

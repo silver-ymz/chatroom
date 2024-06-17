@@ -14,21 +14,21 @@ public class LocalStorage {
 
     private void createTable() throws SQLException {
         String textsSql = """
-        CREATE TABLE IF NOT EXISTS text_msg (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL,
-            date INTEGER NOT NULL,
-            text TEXT NOT NULL
-        )
-        """;
+                CREATE TABLE IF NOT EXISTS text_msg (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT NOT NULL,
+                    date INTEGER NOT NULL,
+                    text TEXT NOT NULL
+                )
+                """;
         String imagesSql = """
-        CREATE TABLE IF NOT EXISTS image_msg (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL,
-            date INTEGER NOT NULL,
-            image BLOB NOT NULL
-        );
-        """;
+                CREATE TABLE IF NOT EXISTS image_msg (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT NOT NULL,
+                    date INTEGER NOT NULL,
+                    image BLOB NOT NULL
+                );
+                """;
         try (PreparedStatement stmt = connection.prepareStatement(textsSql)) {
             stmt.execute();
         }

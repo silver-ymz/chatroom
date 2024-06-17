@@ -13,14 +13,14 @@ This is a simple online chat room application that allows users to chat with eac
 
 ## Used Tools
 
-Client: JavaFX, sqlite3, JDBC
-Server: PostgreSQL, JDBC
-Commons: Maven, Apache Commons Lang3
+- Client: JavaFX, sqlite3, JDBC
+- Server: PostgreSQL, JDBC
+- Commons: Maven, Apache Commons Lang3
 
 ## Configuration
 
 Server DB script:
-```postgresql
+```sql
 CREATE TABLE IF NOT EXISTS text_msg (
     id SERIAL PRIMARY KEY,
     username TEXT NOT NULL,
@@ -33,9 +33,9 @@ CREATE TABLE IF NOT EXISTS image_msg (
     username TEXT NOT NULL,
     date BIGINT NOT NULL,
     image BYTEA NOT NULL
-) ;
+);
 ```
 
 Environment variables:
-Client: `SERVER_HOST`, `SERVER_PORT`
-Server: `SERVER_PORT`, `DB_URL`
+- Client: `SERVER_HOST`, `SERVER_PORT`
+- Server: `SERVER_PORT`, `DB_URL`

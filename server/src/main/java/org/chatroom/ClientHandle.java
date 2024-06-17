@@ -34,7 +34,7 @@ public class ClientHandle implements Runnable {
             int length = in.readInt();
             byte[] data = new byte[length];
             in.readFully(data);
-            username = (String) SerializationUtils.deserialize(data);
+            username = SerializationUtils.deserialize(data);
             if (!ChatServer.registerClient(username, out)) {
                 out.write(0);
                 out.flush();
