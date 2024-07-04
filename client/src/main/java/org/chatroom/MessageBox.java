@@ -11,26 +11,23 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
 public class MessageBox extends AnchorPane {
-    private enum MessageType {
-        TEXT,
-        IMAGE
-    }
-
     private final Boolean isCurrentUser;
-
-    private VBox messageBox;
-    private final MessageType type;
+    private final Boolean ignoreDate;
+    private final Boolean ignoreUsername;
+    private final VBox messageBox;
+    private final Node content;
     private HBox usernameUi;
     private Label dateLabel;
-    private Node content;
 
-    public MessageBox(String username, Date date, String text, Boolean isCurrentUser) {
-        this.type = MessageType.TEXT;
+    public MessageBox(String username, Date date, String text, Boolean isCurrentUser, Message lastMessage) {
         this.isCurrentUser = isCurrentUser;
+        this.ignoreDate = lastMessage != null && lastMessage.date.getTime() / 60000 == date.getTime() / 60000;
+        this.ignoreUsername = lastMessage != null && ignoreDate && lastMessage.username.equals(username);
 
         setDateAndUsername(username, date);
 
@@ -38,73 +35,42 @@ public class MessageBox extends AnchorPane {
         bubble.setAlignment(isCurrentUser ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
         this.content = bubble;
 
-        messageBox = new VBox(10);
-        messageBox.getChildren().addAll(dateLabel, usernameUi, content);
+        ArrayList<Node> children = new ArrayList<>();
+        if (!ignoreDate) {
+            children.add(dateLabel);
+        }
+        if (!ignoreUsername) {
+            children.add(usernameUi);
+        }
+        children.add(content);
+        messageBox = new VBox(10, children.toArray(new Node[0]));
         this.addToPane();
     }
 
-    public MessageBox(String username, Date date, Image image, Boolean isCurrentUser) {
-        this.type = MessageType.IMAGE;
+    public MessageBox(String username, Date date, Image image, Boolean isCurrentUser, Message lastMessage) {
         this.isCurrentUser = isCurrentUser;
+        this.ignoreDate = lastMessage != null && lastMessage.username.equals(username);
+        this.ignoreUsername = lastMessage != null && lastMessage.date.equals(date);
 
         setDateAndUsername(username, date);
 
         ImageView imageView = (new ImageView(image));
         imageView.setFitHeight(200);
         imageView.setPreserveRatio(true);
-        this.content = imageView;
+        HBox bubble = new HBox(imageView);
+        bubble.setAlignment(isCurrentUser ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
+        this.content = bubble;
 
-        messageBox = new VBox();
-        messageBox.getChildren().addAll(dateLabel, usernameUi, content);
+        ArrayList<Node> children = new ArrayList<>();
+        if (!ignoreDate) {
+            children.add(dateLabel);
+        }
+        if (!ignoreUsername) {
+            children.add(usernameUi);
+        }
+        children.add(content);
+        messageBox = new VBox(10, children.toArray(new Node[0]));
         this.addToPane();
-    }
-
-
-    private void addToPane() {
-        messageBox.setMaxWidth(Region.USE_PREF_SIZE);
-        messageBox.setSpacing(5);
-        messageBox.setPadding(new Insets(16, 16, 8, 8));
-
-        this.getChildren().add(messageBox);
-
-        AnchorPane.setLeftAnchor(messageBox, 0.0);
-        AnchorPane.setRightAnchor(messageBox, 0.0);
-
-        this.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
-    }
-
-    public void setDateAndUsername(String username, Date date) {
-        this.dateLabel = new Label(formatDate(date));
-        dateLabel.setAlignment(Pos.CENTER);
-        dateLabel.setMaxWidth(Double.MAX_VALUE);
-
-        Label usernameLabel = new Label(username);
-        usernameLabel.setStyle("-fx-border-color: black; -fx-background-color: #eeeeee; -fx-font-size: 12pt; -fx-font-weight: bold; -fx-padding: 5px; -fx-border-radius: 5px");
-        this.usernameUi = new HBox(usernameLabel);
-        usernameUi.setAlignment(isCurrentUser ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
-    }
-
-    private HBox createMessageBubble(String message) {
-        StackPane bubble = new StackPane();
-
-        Rectangle background = new Rectangle();
-        background.setArcWidth(15);
-        background.setArcHeight(15);
-        background.setFill(Color.WHITE);
-
-        Label messageLabel = new Label(message);
-        messageLabel.setWrapText(true);
-        messageLabel.setPadding(new Insets(5, 10, 5, 10));
-
-        bubble.getChildren().addAll(background, messageLabel);
-
-        background.widthProperty().bind(bubble.widthProperty());
-        background.heightProperty().bind(bubble.heightProperty());
-
-        bubble.setMaxWidth(Region.USE_PREF_SIZE);
-        HBox wrapper = new HBox(bubble);
-        wrapper.setAlignment(isCurrentUser ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
-        return wrapper;
     }
 
     public static String formatDate(Date date) {
@@ -127,4 +93,57 @@ public class MessageBox extends AnchorPane {
         }
     }
 
+    private void addToPane() {
+        messageBox.setMaxWidth(Region.USE_PREF_SIZE);
+        messageBox.setSpacing(5);
+        messageBox.setPadding(new Insets(16, 16, 8, 8));
+
+        this.getChildren().add(messageBox);
+
+        AnchorPane.setLeftAnchor(messageBox, 0.0);
+        AnchorPane.setRightAnchor(messageBox, 0.0);
+
+        this.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
+    }
+
+    public void setDateAndUsername(String username, Date date) {
+        if (!ignoreDate) {
+            this.dateLabel = new Label(formatDate(date));
+            dateLabel.setAlignment(Pos.CENTER);
+            dateLabel.setMaxWidth(Double.MAX_VALUE);
+        }
+
+        if (!ignoreUsername) {
+            Label usernameLabel = new Label(username);
+            usernameLabel.setStyle("-fx-font-size: 8pt; -fx-font-weight: bold; -fx-padding-bottom: 0px;");
+            this.usernameUi = new HBox(usernameLabel);
+            usernameUi.setAlignment(isCurrentUser ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
+        }
+    }
+
+    private HBox createMessageBubble(String message) {
+        StackPane bubble = new StackPane();
+
+        Rectangle background = new Rectangle();
+        background.setArcWidth(15);
+        background.setArcHeight(15);
+        background.setFill(Color.WHITE);
+
+        Label messageLabel = new Label(message);
+        messageLabel.setWrapText(true);
+        messageLabel.setPadding(new Insets(5, 10, 5, 10));
+
+        bubble.getChildren().addAll(background, messageLabel);
+
+        background.widthProperty().bind(bubble.widthProperty());
+        background.heightProperty().bind(bubble.heightProperty());
+
+        bubble.setMaxWidth(Region.USE_PREF_SIZE);
+        HBox wrapper = new HBox(bubble);
+        wrapper.setAlignment(isCurrentUser ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
+        if (ignoreUsername) {
+            wrapper.setPadding(new Insets(-20, 0, 0, 0));
+        }
+        return wrapper;
+    }
 }

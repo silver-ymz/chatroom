@@ -9,7 +9,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -28,6 +27,7 @@ public class ChatClient extends Application {
     private static final int MAX_IMAGE_HEIGHT = 1000;
 
     public static String username = "test";
+    public static Message lastMessage = null;
 
     private Stage primaryStage;
     private VBox messageArea;
@@ -63,10 +63,20 @@ public class ChatClient extends Application {
         TextArea usernameField = new TextArea();
         usernameField.setPromptText("Username");
         usernameField.setPrefSize(200, 20);
+        usernameField.setOnKeyPressed(e -> {
+            if (e.getCode().toString().equals("ENTER")) {
+                String username = usernameField.getText().trim();
+                if (!username.isEmpty()) {
+                    ChatClient.username = username;
+                    primaryStage.getScene().setRoot(new VBox());
+                    startChat();
+                }
+            }
+        });
         usernameBox.getChildren().add(usernameField);
         Button usernameButton = new Button("Set Username");
         usernameButton.setOnAction(e -> {
-            String username = usernameField.getText();
+            String username = usernameField.getText().trim();
             if (!username.isEmpty()) {
                 ChatClient.username = username;
                 primaryStage.getScene().setRoot(new VBox());
@@ -91,10 +101,15 @@ public class ChatClient extends Application {
         inputField = new TextArea();
         inputField.setPromptText("Enter your message...");
         inputField.setPrefRowCount(1);
-        inputField.setPrefSize(300, 10);
+        inputField.setOnKeyPressed(e -> {
+            if (e.getCode().toString().equals("ENTER")) {
+                sendText();
+            }
+        });
 
         // Text Send button
         Button textSendButton = new Button("Send");
+        textSendButton.setMinSize(50, textSendButton.getMinHeight());
         textSendButton.setOnAction(e -> sendText());
 
         // Image Send button
@@ -122,7 +137,7 @@ public class ChatClient extends Application {
     }
 
     void sendText() {
-        String text = inputField.getText();
+        String text = inputField.getText().trim();
         if (!text.isEmpty()) {
             Date date = new Date();
 
@@ -134,9 +149,9 @@ public class ChatClient extends Application {
             syncService.sendMessage(message);
 
             // Display message in message area
-            displayText(username, date, text);
-            inputField.clear();
+            displayMessage(message);
         }
+        inputField.clear();
     }
 
     // 1. ask user to set image path
@@ -188,7 +203,7 @@ public class ChatClient extends Application {
         syncService.sendMessage(message);
 
         // Display image in message area
-        displayImage(username, date, image);
+        displayMessage(message);
     }
 
     public void displayMessage(Message message) {
@@ -197,14 +212,17 @@ public class ChatClient extends Application {
         } else {
             displayImage(message.username, message.date, new Image(new ByteArrayInputStream((byte[]) message.content)));
         }
+        lastMessage = message;
     }
 
+    // Don't call it directly, use displayMessage instead
     private void displayText(String username, Date date, String text) {
-        messageArea.getChildren().add(new MessageBox(username, date, text, username.equals(ChatClient.username)));
+        messageArea.getChildren().add(new MessageBox(username, date, text, username.equals(ChatClient.username), lastMessage));
     }
 
+    // Don't call it directly, use displayMessage instead
     private void displayImage(String username, Date date, Image image) {
-        MessageBox messageBox = new MessageBox(username, date, image, username.equals(ChatClient.username));
+        MessageBox messageBox = new MessageBox(username, date, image, username.equals(ChatClient.username), lastMessage);
         messageArea.getChildren().add(messageBox);
     }
 }
