@@ -85,30 +85,31 @@ public class ChatClient extends Application {
         messageArea = new VBox();
         ScrollPane scrollPane = new ScrollPane(messageArea);
         scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
         // Input field
         inputField = new TextArea();
         inputField.setPromptText("Enter your message...");
-        inputField.setPrefSize(400, 100);
+        inputField.setPrefRowCount(1);
+        inputField.setPrefSize(300, 10);
 
         // Text Send button
-        Button textSendButton = new Button("Send Text");
+        Button textSendButton = new Button("Send");
         textSendButton.setOnAction(e -> sendText());
 
         // Image Send button
-        Button imageSendButton = new Button("Send Image");
+        Button imageSendButton = new Button("+");
         imageSendButton.setOnAction(e -> sendImage());
 
         // Layout setup
-        VBox buttonBox = new VBox(5, textSendButton, imageSendButton);
-        HBox inputBox = new HBox(5, inputField, buttonBox);
+        HBox inputBox = new HBox(5, inputField, imageSendButton, textSendButton);
         inputBox.setPadding(new Insets(10));
 
         BorderPane root = new BorderPane();
         root.setCenter(scrollPane);
         root.setBottom(inputBox);
 
-        primaryStage.setScene(new Scene(root, 600, 400));
+        primaryStage.setScene(new Scene(root, 400, 600));
         primaryStage.show();
 
         // Initialize SyncService
@@ -199,18 +200,11 @@ public class ChatClient extends Application {
     }
 
     private void displayText(String username, Date date, String text) {
-        String formattedDate = String.format("[%tT] ", date);
-        String message = formattedDate + username + ": " + text;
-        messageArea.getChildren().add(new Label(message));
+        messageArea.getChildren().add(new MessageBox(username, date, text, username.equals(ChatClient.username)));
     }
 
     private void displayImage(String username, Date date, Image image) {
-        ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(400);
-        imageView.setPreserveRatio(true);
-        String formattedDate = String.format("[%tT] ", date);
-        String message = formattedDate + username + ": ";
-        VBox messageBox = new VBox(5, new Label(message), imageView);
+        MessageBox messageBox = new MessageBox(username, date, image, username.equals(ChatClient.username));
         messageArea.getChildren().add(messageBox);
     }
 }

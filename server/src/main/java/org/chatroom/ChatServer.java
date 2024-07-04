@@ -27,6 +27,8 @@ public class ChatServer {
         ServerSocket socket;
         DataOutputStream messageOut;
 
+        System.out.println("Starting server..." + PORT + " " + DB_URL);
+
         try {
             executor = Executors.newFixedThreadPool(4);
             socket = new ServerSocket(PORT);
